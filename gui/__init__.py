@@ -1,21 +1,14 @@
 ## coding: UTF-8
 import pathlib
-import traceback
 from PyQt5.QtWidgets import *
 from PyQt5 import QtGui
-from PyQt5.QtCore import Qt, pyqtSignal, QThread
-from bs4 import BeautifulSoup
-import urllib.request as req
-import MeCab
-from wordcloud import WordCloud
+from PyQt5.QtCore import Qt, pyqtSignal
 from . import fonts
 import matplotlib.pyplot as plt
 from matplotlib.figure import SubplotParams
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import json
-import copy
 import numpy as np
-from PIL import Image
 
 COLOR_MAPS = ['viridis', 'plasma', 'inferno', 'magma'] + [
             'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
@@ -60,10 +53,15 @@ class LabeledObject(QWidget):
         for member in [func for func in dir(self.object) if (callable(getattr(self.object, func)) or isinstance(getattr(self.object, func), pyqtSignal))]:
             if not hasattr(self, member):
                 exec(f'self.{member} = self.object.{member}')
+    
+    def __del__(self):
+        del self.label
+        del self.object
+        del self.l_main
 
 class FileLineEdit(QLineEdit):
     sig_return_file = pyqtSignal(object)
-    def __init__(self, *args, caption='Selecct mask image file', filter='Image Files (*.png *.jpg *.bmp)', **kwargs):
+    def __init__(self, *args, caption='Select mask image file', filter='Image Files (*.png *.jpg *.bmp)', **kwargs):
         super().__init__(*args, **kwargs)
         self.caption = caption
         self.filter = filter
@@ -81,6 +79,25 @@ class FileLineEdit(QLineEdit):
         super().mouseDoubleClickEvent(*args, **kwargs)
         self.openFile()
 
+class FolderLineEdit(QLineEdit):
+    sig_return_file = pyqtSignal(object)
+    def __init__(self, *args, caption='Select folder', **kwargs):
+        super().__init__(*args, **kwargs)
+        self.caption = caption
+        self.textChanged.connect(self.emit_file_path)
+    
+    def emit_file_path(self, text):
+        self.sig_return_file.emit(text)
+
+    def openFolder(self):
+        folder = QFileDialog.getExistingDirectory(self, caption=self.caption)
+        if folder:
+            self.setText(folder)
+
+    def mouseDoubleClickEvent(self, *args, **kwargs):
+        super().mouseDoubleClickEvent(*args, **kwargs)
+        self.openFolder()
+
 class SrcGroup(QGroupBox):
     labelChanged = pyqtSignal(object)
     def __init__(self, *args, **kwargs):
@@ -94,9 +111,16 @@ class SrcGroup(QGroupBox):
         self.l_main = QGridLayout()
         self.setLayout(self.l_main)
         [self.l_main.addWidget(_b, _ii//2, _ii%2) for _ii, _b in enumerate(self.b_radios.buttons())]
+    
+    def get_type(self):
+        btn = self.b_radios.checkedButton()
+        if btn is None:
+            return None
+        else:
+            return btn.text()
 
 class PrefURL():
-    def __init__(self, label='URL:'):
+    def __init__(self):
         self.url     = LabeledObject('URL:', QLineEdit, 'https://www.mlmarket.jp/')
         self.depth   = LabeledObject('Depth:', QSpinBox)
         self.depth.setMinimum(0)
@@ -113,44 +137,42 @@ class PrefURL():
         ret = self.items[self.current]
         self.current += 1
         return ret
-    
-    @staticmethod
-    def get_host_name(url):
-        return '/'.join(url.split('/')[:4])
-    
-    @staticmethod
-    def get_page_text_only(soup):
-        for script in soup(["script", "style"]):
-            script.decompose()
-        text  = soup.get_text()
-        lines = [line.strip() for line in text.splitlines()]
-        lines = [line for line in lines if line]
-        return lines
+        
+class PrefFile():
+    def __init__(self):
+        self.url     = LabeledObject('File:', FileLineEdit, caption='Select file', filter='Files (*.txt *.csv *.tsv *.htm *.html *.doc *.docx *.xls *.xlsx *.ppt *.pptx)')
+        self.items   = [self.url]
+        self.current = 0
 
-    def get_text(self, url=None, host=None, depth=None):
-        if url is None:
-            self.done = []
-            url = self.url.text()
-        if not url.startswith('http'):
-            url = 'http://'+url
-        if host is None:
-            host = self.get_host_name(url)
-        if depth is None:
-            depth = self.depth.value()
-        if url.startswith(host) and (url not in self.done):
-            try:
-                res  = req.urlopen(url)
-                soup = BeautifulSoup(res, "html.parser")
-                for line in self.get_page_text_only(soup):
-                    yield line
-                self.done.append(url)
-                if depth>0:
-                    for aa in soup.find_all("a"):
-                        link = aa.get("href")
-                        for line in self.get_text(url=link, host=host, depth=depth-1):
-                            yield line
-            except:
-                pass
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.current == len(self.items):
+            raise StopIteration()
+        ret = self.items[self.current]
+        self.current += 1
+        return ret
+
+class PrefFolder():
+    def __init__(self):
+        self.url     = LabeledObject('Folder:', FolderLineEdit)
+        self.depth   = LabeledObject('Depth:', QSpinBox)
+        self.depth.setMinimum(0)
+        self.depth.setMaximum(5)
+        self.items   = [self.url, self.depth]
+        self.current = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.current == len(self.items):
+            raise StopIteration()
+        ret = self.items[self.current]
+        self.current += 1
+        return ret
+        
 
 class InputGroup(QGroupBox):
     def __init__(self, *args, **kwargs):
@@ -160,6 +182,14 @@ class InputGroup(QGroupBox):
         self.setLayout(self.l_main)
         self.l_main.addStretch()
     
+    @property
+    def url(self):
+        return self.pref.url.text()
+        
+    @property
+    def depth(self):
+        return self.pref.depth.value()
+
     def addWidget(self, *args):
         self.l_main.addWidget(*args)
     
@@ -169,14 +199,16 @@ class InputGroup(QGroupBox):
         elif text == 'Twitter':
             self.pref = PrefURL()
         elif text == 'File':
-            self.pref = PrefURL()
+            self.pref = PrefFile()
         elif text == 'Folder':
-            self.pref = PrefURL()
+            self.pref = PrefFolder()
         return self.pref
 
     def setPrefType(self, button):
-        while self.l_main.takeAt(0) != None:
-            pass
+        for ii in reversed(range(self.l_main.count())): 
+            w = self.l_main.itemAt(ii).widget()
+            if w is not None:
+                w.setParent(None)
         for items in self.get_pref_items(button.text()):
             self.l_main.addWidget(items)
         self.l_main.addStretch()
@@ -225,7 +257,7 @@ class PrefGroup(QGroupBox):
         self.img_mask = QLabel()
         self.img_mask.setFixedWidth(128)
         self.img_mask.setFixedHeight(128)
-        self.s_mask = LabeledObject('マスク:', FileLineEdit, caption='Selecct mask image file', filter='Image Files (*.png *.jpg *.bmp)')
+        self.s_mask = LabeledObject('マスク:', FileLineEdit, caption='Select mask image file', filter='Image Files (*.png *.jpg *.bmp)')
         self.s_mask.sig_return_file.connect(self.set_mask_image)
         [self.l_main.addWidget(_w) for _w in [self.i_width, self.i_height, self.s_bg, self.c_cmap, self.c_font, QLabel('品詞:'), w_hinshi, self.img_mask, self.s_mask]]
         self.load_pref()
@@ -273,42 +305,6 @@ class PrefGroup(QGroupBox):
         except:
             pass
 
-
-class GenerateWordCloud(QThread):
-    sig_return_wc = pyqtSignal(object)
-    def __init__(self, *args, g_input, pref={'use_hinshi': ["名詞", "動詞", "形容詞"],
-                                            'font_path': 'C:\\WINDOWS\\fonts\\HGRGE.TTC',
-                                            'background_color': "white",
-                                            'width': 600,
-                                            'height': 400,
-                                            }, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.g_input = g_input
-        self.pref    = pref
-
-    def run(self):
-        m     = MeCab.Tagger()
-        words = []
-        try:
-            for line in self.g_input.get_text():
-                node = m.parseToNode(line)
-                while node:
-                    if node.feature.split(",")[0] in self.pref['use_hinshi']:
-                        words.append(node.surface)
-                    node = node.next
-        except:
-            words = traceback.format_exc()
-        pref = copy.deepcopy(self.pref)
-        del pref['use_hinshi']
-        if 'mask' in pref:
-            try:
-                pref['mask'] = np.array(Image.open(pref['mask']))
-            except:
-                del pref['mask']
-        wordcloud = WordCloud(**pref).generate(' '.join(words))
-        self.sig_return_wc.emit(wordcloud)
-        
-
 class MenuDock(QDockWidget):
     sig_return_wc = pyqtSignal(object)
     def __init__(self, *args, **kwargs):
@@ -326,26 +322,23 @@ class MenuDock(QDockWidget):
         self.l_main.addWidget(self.g_input)
         self.l_main.addWidget(self.g_pref)
     
-    def get_wc_pref(self):
+    @property
+    def url(self):
+        return self.g_input.url
+    
+    @property
+    def depth(self):
+        return self.g_input.depth
+    
+    @property
+    def pref(self):
         return self.g_pref.get_pref()
+
+    def get_type(self):
+        return self.g_src.get_type()
 
     def addWidget(self, *args):
         self.l_main.addWidget(*args)
-
-    def generate_words(self, pref={'use_hinshi': ["名詞", "動詞", "形容詞"],
-                                            'font_path': 'C:\\WINDOWS\\fonts\\HGRGE.TTC',
-                                            'background_color': "white",
-                                            'width': 600,
-                                            'height': 400,
-                                            }):
-        generator = GenerateWordCloud(
-            parent=self,
-            g_input=self.g_input,
-            pref=pref,
-        )
-        generator.sig_return_wc.connect(lambda wc: self.sig_return_wc.emit(wc))
-        generator.start()
-        
 
 class MainButtons(QWidget):
     sig_generate = pyqtSignal(object)
@@ -382,14 +375,16 @@ class MainCanvas(QGraphicsView):
         gif.start()
         self.scene.addWidget(loading)
     
-    def set_wordclowd(self, wc):
+    def set_wordcloud(self, wc):
         self.wc = wc
         wc.to_file(str(self.tmp_png))
         for item in self.scene.items():
             self.scene.removeItem(item)
         pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(str(self.tmp_png)))
         self.scene.addPixmap(pixmap)
-
+    
+    def get_wordcloud(self):
+        return self.wc
 
 class MainWidget(QWidget):
     def __init__(self, *args, **kwargs):
@@ -402,6 +397,7 @@ class MainWidget(QWidget):
         self.l_main.addWidget(*args)
 
 class MainWindow(QMainWindow):
+    sig_generate = pyqtSignal(object)
     def __init__(self, app):
         super().__init__()
         self.app = app
@@ -417,19 +413,34 @@ class MainWindow(QMainWindow):
         # --- Menue widget
         self.d_menu = MenuDock(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.d_menu)
-        self.d_menu.sig_return_wc.connect(self.w_canvas.set_wordclowd)
+        self.d_menu.sig_return_wc.connect(self.w_canvas.set_wordcloud)
         ## --- Buttons widget
         self.w_buttons = MainButtons(self)
         self.d_menu.addWidget(self.w_buttons)
         self.w_buttons.sig_generate.connect(self.generate)
         self.w_buttons.sig_save.connect(self.export)
+    
+    def set_wordcloud(self, wc):
+        self.w_canvas.set_wordcloud(wc)
 
     def export(self, *args):
-        pass
+        wc = self.w_canvas.get_wordcloud()
+        if wc is not None:
+            fname = QFileDialog.getSaveFileName(self, 'Export image file', filter='Image Files (*.png *.jpg *.bmp)')
+            if fname[0]:
+                wc.to_file(fname[0])
 
     def generate(self, *args):
         self.w_canvas.set_loading_gif()
-        self.d_menu.generate_words(pref=self.d_menu.get_wc_pref())
+        kwargs = {'type': self.d_menu.get_type()}
+        kwargs['type'] = kwargs['type'].lower() if kwargs['type'] is not None else None
+        if kwargs['type'] == 'web':
+            kwargs['kwargs'] = {'url':self.d_menu.url, 'depth':self.d_menu.depth, 'pref':self.d_menu.pref}
+        elif kwargs['type'] == 'file':
+            kwargs['kwargs'] = {'path':self.d_menu.url, 'pref':self.d_menu.pref}
+        elif kwargs['type'] == 'folder':
+            kwargs['kwargs'] = {'path':self.d_menu.url, 'depth':self.d_menu.depth, 'pref':self.d_menu.pref}
+        self.sig_generate.emit(kwargs)
 
     def getPosition(self):
         return self.geometry().x(), self.geometry().y(), self.geometry().width(), self.geometry().height()

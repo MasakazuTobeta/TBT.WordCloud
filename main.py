@@ -1,29 +1,54 @@
 ## coding: UTF-8
 import sys
-import argparse
-import pathlib
-from distutils.util import strtobool
 from PyQt5.QtWidgets import QApplication
-
+from PyQt5.QtCore import QObject
+from PyQt5.QtCore import pyqtSignal
 from gui import MainWindow
+from Generator.ReaderWeb import GenerateFromWeb
+from Generator.ReaderFile import GenerateFromFile
+from Generator.ReaderDir import GenerateFromDir
 
 #--------------
-# Parse args
+# Main object
 #--------------
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--hoge' , type=pathlib.Path, default=None)
-    parser.add_argument('--fuga' , type=strtobool   , default=None)
-    args = parser.parse_args()
-    return args
+class Main(QObject):
+    sig_return_wc = pyqtSignal(object)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.app     = QApplication(sys.argv)
+        self.widndow = MainWindow(self.app)
+        self.__init_sig_con_definition()
+    
+    # --- Signal/Connect definitions ---
+    def __init_sig_con_definition(self):
+        self.widndow.sig_generate.connect(self.generate)
+        self.sig_return_wc.connect(self.widndow.set_wordcloud)
+    
+    def set_wordcloud(self, wc):
+        self.sig_return_wc.emit(wc)
+
+    def generate(self, kwargs):
+        print(kwargs)
+        if kwargs['type'] is None:
+            kwargs = {'type':'web', 'kwargs':{'url':'', 'depth':0}}
+        if kwargs['type'].lower() == 'web':
+            generator = GenerateFromWeb
+        elif  kwargs['type'].lower() == 'file':
+            generator = GenerateFromFile
+        elif  kwargs['type'].lower() == 'folder':
+            generator = GenerateFromDir
+        gen = generator(parent=self, **kwargs['kwargs'])
+        gen.sig_return_wc.connect(self.set_wordcloud)
+        gen.start()
+
+    def __call__(self):
+        self.widndow.show()
+        self.app.exec_()
 
 #--------------
 # Main
 #--------------
 if __name__ == "__main__":
-    args     = parse_args()
-    app      = QApplication(sys.argv)
-    main_gui = MainWindow(app)
-    main_gui.show()
-    app.exec_()
+    main = Main()
+    main()
     sys.exit()
