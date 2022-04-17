@@ -402,7 +402,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.app = app
         self.setWindowIcon(QtGui.QIcon('image/icon.png'))
-        self.setWindowTitle('ML-WordCloud')
+        self.setWindowTitle('TBT.WordCloud')
         
         # --- Main widgets
         self.w_main = MainWidget()

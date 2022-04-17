@@ -134,3 +134,4 @@ dmypy.json
 # Build and Dist
 build/
 dist/
+*.spec

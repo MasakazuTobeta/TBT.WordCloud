@@ -3,6 +3,7 @@ import copy
 import traceback
 import numpy as np
 from PIL import Image
+import unidic_lite
 import MeCab
 from wordcloud import WordCloud
 from PyQt5.QtCore import pyqtSignal, QThread

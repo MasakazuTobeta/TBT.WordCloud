@@ -1,5 +1,10 @@
 ## coding: UTF-8
 import sys
+try:
+    import pyi_splash
+    pyi_splash.update_text('Now loading ...')
+except:
+    pass
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QObject
 from PyQt5.QtCore import pyqtSignal
@@ -50,5 +55,6 @@ class Main(QObject):
 #--------------
 if __name__ == "__main__":
     main = Main()
+    pyi_splash.close()
     main()
     sys.exit()

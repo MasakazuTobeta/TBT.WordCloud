@@ -1,9 +1,16 @@
-# ML-WordCloud
+# TBT.WordCloud
 WordCloud Generator
 
 # Build application
 ```
-pyinstaller main.spec
+pyinstaller --collect-data unidic_lite \
+            --collect-data wordcloud \
+            --hidden-import wordcloud \
+            --hidden-import unidic_lite \
+            --name 'TBT.WordCloud'\
+            --icon ./image/icon.ico\
+            --splash './image/splash.png'\
+            --onefile --noconsole main.py
 cp -r ./image ./dist/
 ```
 
