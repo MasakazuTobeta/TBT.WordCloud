@@ -1,6 +1,22 @@
 # TBT.WordCloud
 WordCloud Generator
 
+# Setup environment
+```
+python3 -m venv .venv
+./.venv\Scripts\deactivate
+pip install -r requirements.txt
+```
+
+# Quick start
+```
+./.venv\Scripts\deactivate
+python main.py
+```
+
+# User manual
+Please check the [user manual(jp)](./UserManual.md)
+
 # Build application
 ```
 pyinstaller --collect-data unidic_lite \
@@ -9,7 +25,6 @@ pyinstaller --collect-data unidic_lite \
             --hidden-import unidic_lite \
             --name 'TBT.WordCloud'\
             --icon ./image/icon.ico\
-            --splash './image/splash.png'\
             --onefile --noconsole main.py
 cp -r ./image ./dist/
 ```

@@ -1,4 +1,6 @@
 ## coding: UTF-8
+import logging
+logger = logging.getLogger(__name__)
 import copy
 import traceback
 import numpy as np
@@ -31,8 +33,8 @@ class GenerateWordCloud(QThread):
                     node = node.next
             if len(words) <= 0:
                 words = ['None']
-        except:
-            traceback.print_exc()
+        except Exception as e:
+            logger.exception('Error something: %s', e)
             if len(words) <= 0:
                 words = traceback.format_exc()
         pref = copy.deepcopy(self.pref)
@@ -42,5 +44,11 @@ class GenerateWordCloud(QThread):
                 pref['mask'] = np.array(Image.open(pref['mask']).resize((pref['width'], pref['height'])))
             except:
                 del pref['mask']
+        if 'background_color' in pref:
+            if pref['background_color'] == 'clear':
+                pref['background_color'] = None
+                pref['mode'] = 'RGBA'
+        if 'mode' not in pref:
+            pref['mode'] = 'RGBA'
         wordcloud = WordCloud(**pref).generate(' '.join(words))
         self.sig_return_wc.emit(wordcloud)

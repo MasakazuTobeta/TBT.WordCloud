@@ -1,17 +1,23 @@
 ## coding: UTF-8
 import sys
+import com
+import logging
+logger = logging.getLogger(__name__)
 try:
     import pyi_splash
     pyi_splash.update_text('Now loading ...')
 except:
-    pass
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QObject
-from PyQt5.QtCore import pyqtSignal
-from gui import MainWindow
-from Generator.ReaderWeb import GenerateFromWeb
-from Generator.ReaderFile import GenerateFromFile
-from Generator.ReaderDir import GenerateFromDir
+    logger.info('Now loading ...')
+try:
+    from PyQt5.QtWidgets import QApplication
+    from PyQt5.QtCore import QObject
+    from PyQt5.QtCore import pyqtSignal
+    from gui import MainWindow
+    from Generator.ReaderWeb import GenerateFromWeb
+    from Generator.ReaderFile import GenerateFromFile
+    from Generator.ReaderDir import GenerateFromDir
+except Exception as e:
+    logger.exception('Error something: %s', e)
 
 #--------------
 # Main object
@@ -33,7 +39,7 @@ class Main(QObject):
         self.sig_return_wc.emit(wc)
 
     def generate(self, kwargs):
-        print(kwargs)
+        logger.info(str(kwargs))
         if kwargs['type'] is None:
             kwargs = {'type':'web', 'kwargs':{'url':'', 'depth':0}}
         if kwargs['type'].lower() == 'web':
@@ -54,7 +60,13 @@ class Main(QObject):
 # Main
 #--------------
 if __name__ == "__main__":
-    main = Main()
-    pyi_splash.close()
-    main()
+    try:
+        main = Main()
+        try:
+            pyi_splash.close()
+        except:
+            pass
+        main()
+    except Exception as e:
+        logger.exception('Error something: %s', e)
     sys.exit()
