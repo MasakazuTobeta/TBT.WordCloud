@@ -1,5 +1,5 @@
 # TBT.WordCloud
-WordCloud Generator
+![TBT.WordCloud/Sample](./image/sample.png)
 
 # Setup environment
 ```
@@ -14,8 +14,8 @@ pip install -r requirements.txt
 python main.py
 ```
 
-# User manual
-Please check the [user manual(jp)](./UserManual.md)
+# User's manual
+Please check the [manual](./UserManual.md)
 
 # Build application
 ```
