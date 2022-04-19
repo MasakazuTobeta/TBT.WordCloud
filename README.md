@@ -33,4 +33,4 @@ cp -r ./image ./dist/
 https://www.dropbox.com/sh/xcm3zsxrtq9h9ee/AABmC_rggr3loPwaVys7Nr21a?dl=0
 
 # Commercial License
-In principle, the open source license is [LICENSE](. /LICENSE) file, but commercial use is prohibited. This software is also available for licensing via TOBETA.
+In principle, the open source license is [LICENSE](./LICENSE) file, but commercial use is prohibited. This software is also available for licensing via TOBETA.

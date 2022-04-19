@@ -1,30 +1,36 @@
-lib,ver,license
-beautifulsoup4,4.11.1
-chardet,4.0.0
-cycler,0.11.0
-et-xmlfile,1.1.0
-fonttools,4.32.0
-kiwisolver,1.4.2
-lxml,4.8.0
-matplotlib,3.5.1
-mecab-python3,1.0.5
-numpy,1.22.3
-openpyxl,3.0.9
-packaging,21.3
-pandas,1.4.2
-Pillow,9.1.0
-pip-licenses,3.5.3
-PTable,0.9.2
-pyparsing,3.0.8
-PyQt5,5.15.6
-PyQt5-Qt5,5.15.2
-PyQt5-sip,12.10.1
-python-dateutil,2.8.2
-python-docx,0.8.11
-python-pptx,0.6.21
-pytz,2022.1
-six,1.16.0
-soupsieve,2.3.2.post1
-unidic-lite,1.0.8
-wordcloud,1.8.1
-XlsxWriter,3.0.3
+lib,ver,license,url
+altgraph,0.17.2,MIT,https://altgraph.readthedocs.io/en/latest/license.html
+beautifulsoup4,4.11.1,MIT,https://github.com/akalongman/python-beautifulsoup/blob/master/LICENSE
+chardet,4.0.0,GNU Lesser General Public License v2.1,https://github.com/chardet/chardet/blob/master/LICENSE
+cycler,0.11.0,BSD-3-Clause License,https://github.com/matplotlib/cycler/blob/main/LICENSE
+et-xmlfile,1.1.0,MIT,https://foss.heptapod.net/openpyxl/et_xmlfile/-/blob/branch/default/LICENCE.rst
+fonttools,4.32.0,MIT,https://github.com/fonttools/fonttools/blob/main/LICENSE
+future,0.18.2,MIT,https://python-future.org/credits.html#licence
+kiwisolver,1.4.2,Modified BSD License,https://github.com/nucleic/kiwi/blob/main/LICENSE
+lxml,4.8.0,BSD-3-Clause License,https://github.com/lxml/lxml/blob/master/LICENSE.txt
+matplotlib,3.5.1,Custom,https://github.com/matplotlib/matplotlib/blob/main/LICENSE/LICENSE
+mecab-python3,1.0.5,LGPL,https://github.com/SamuraiT/mecab-python3/blob/master/LGPL
+numpy,1.22.3,BSD-3-Clause License,https://github.com/numpy/numpy/blob/main/LICENSE.txt
+openpyxl,3.0.9,MIT/Expat,https://foss.heptapod.net/openpyxl/openpyxl/-/blob/branch/3.0/LICENCE.rst
+packaging,21.3,"Apache Software License, BSD License",https://github.com/pypa/packaging/blob/main/LICENSE
+pandas,1.4.2,BSD-3-Clause License,https://github.com/pandas-dev/pandas/blob/main/LICENSE
+pefile,2021.9.3,MIT,https://github.com/erocarrera/pefile/blob/master/LICENSE
+Pillow,9.1.0,Historical Permission Notice and Disclaimer,https://github.com/python-pillow/Pillow/blob/main/LICENSE
+pip-licenses,3.5.3,MIT,https://github.com/raimon49/pip-licenses/blob/master/LICENSE
+PTable,0.9.2,BSD-3-Clause License,https://github.com/kxxoling/PTable/blob/master/COPYING
+pyinstaller,4.1,GNU General Public License v2 (GPLv2) (GPLv2-or-later with a special exception which allows to use PyInstaller to build and distribute non-free programs (including commercial ones)),https://github.com/pyinstaller/pyinstaller/blob/develop/COPYING.txt
+pyinstaller-hooks-contrib,2022.3,GPLv2,https://github.com/pyinstaller/pyinstaller-hooks-contrib/blob/master/LICENSE
+pyparsing,3.0.8,MIT,https://github.com/pyparsing/pyparsing/blob/master/LICENSE
+PyQt5,5.15.6,GPLv3,
+PyQt5-Qt5,5.15.2,GPLv3,
+PyQt5-sip,12.10.1,GPLv3,
+python-dateutil,2.8.2,"Apache Software License, BSD License",https://github.com/dateutil/dateutil/blob/master/LICENSE
+python-docx,0.8.11,MIT,https://github.com/python-openxml/python-docx/blob/master/LICENSE
+python-pptx,0.6.21,MIT,https://github.com/scanny/python-pptx/blob/master/LICENSE
+pytz,2022.1,MIT,https://pythonhosted.org/pytz/#license
+pywin32-ctypes,0.2.0,BSD-4?,https://github.com/enthought/pywin32-ctypes
+six,1.16.0,MIT,https://github.com/benjaminp/six/blob/master/LICENSE
+soupsieve,2.3.2.post1,MIT,https://github.com/facelessuser/soupsieve/blob/main/LICENSE.md
+unidic-lite,1.0.8,MIT,https://github.com/polm/unidic-lite/blob/master/LICENSE
+wordcloud,1.8.1,MIT,https://github.com/amueller/word_cloud/blob/master/LICENSE
+XlsxWriter,3.0.3,BSD-2-Clause License,https://github.com/jmcnamara/XlsxWriter/blob/main/LICENSE.txt

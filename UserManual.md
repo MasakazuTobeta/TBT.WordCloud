@@ -48,3 +48,14 @@
 URL(質問issue投稿OK): https://github.com/MasakazuTobeta/TBT.WordCloud/issues
 <br>
 Mail: m.tobeta@tobeta.jp
+<br>
+<br>
+
+# Appendix
+## GPL・LGPLが適用されるソフトウェアの利用について
+本ソフトウェアには、GNU General Public License (GPL)またはGNU Lesser General Public License (LGPL)に基づきライセンスされるソフトウェアが含まれています。
+お客様は、当該ソフトウェアのソースコードを入手し、GPLまたはLGPLに従い、複製、頒布及び改変することができます。
+ソースコードは現状のまま、かつGPL/LGPLに基づき提供されます。<br>
+GPLについてはこちらのURLでご確認ください。　http://www.gnu.org/licenses/gpl.html<br>
+LGPLについてはこちらのURLでご確認ください。　http://www.gnu.org/licenses/lgpl.html<br>
+本ソフトウェアソースコードについてはこちらのURLでご確認ください。https://github.com/MasakazuTobeta/TBT.WordCloud<br>
