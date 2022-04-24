@@ -10,7 +10,7 @@ pip install -r requirements.txt
 
 # Quick start
 ```
-./.venv\Scripts\deactivate
+./.venv\Scripts\activate
 python main.py
 ```
 
